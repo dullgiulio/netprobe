@@ -3,7 +3,6 @@ package netprobe
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"time"
 )
@@ -102,21 +101,4 @@ func (p *probe) run(ctx context.Context, timeout time.Duration) (net.Conn, error
 func Dial(ctx context.Context, addrs []string, timeout time.Duration) (net.Conn, error) {
 	p := newProbe(addrs)
 	return p.run(ctx, timeout)
-}
-
-func main() {
-	addrs := []string{
-		//"35.186.224.40:443",
-		"127.0.0.1:1235",
-		"127.0.0.1:1236",
-		"127.0.0.1:1237",
-		"127.0.0.1:1238",
-	}
-	c, err := Dial(context.Background(), addrs, 5*time.Second)
-	if err != nil {
-		log.Printf("failed: %v", err)
-		return
-	}
-	fmt.Printf("DEBUG conntected %v\n", c)
-	c.Close()
 }
