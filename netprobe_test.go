@@ -17,7 +17,7 @@ func TestNetprobe(t *testing.T) {
 		"127.0.0.1:1237",
 		"127.0.0.1:1238",
 	}
-	c, err := Dial(context.Background(), addrs, 5*time.Second)
+	c, err := Dial(context.Background(), "tcp", addrs, 5*time.Second)
 	if err != nil {
 		log.Printf("failed: %v", err)
 		return

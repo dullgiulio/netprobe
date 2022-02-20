@@ -13,12 +13,16 @@ type result struct {
 }
 
 type probe struct {
-	addrs []string
+	addrs    []string
+	parallel int
+	network  string
 }
 
-func newProbe(addrs []string) *probe {
+func newProbe(network string, addrs []string) *probe {
 	return &probe{
-		addrs: addrs,
+		addrs:    addrs,
+		parallel: 50,
+		network:  network,
 	}
 }
 
@@ -30,7 +34,7 @@ func (p *probe) dial(ctx context.Context, timeout time.Duration, addr string) *r
 	ctx, cancel = context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	c, err := dialer.DialContext(ctx, "tcp", addr)
+	c, err := dialer.DialContext(ctx, p.network, addr)
 	if err != nil {
 		return &result{err: err}
 	}
@@ -52,7 +56,7 @@ func (p *probe) start(ctx context.Context, timeout time.Duration, addrs <-chan s
 }
 
 func (p *probe) run(ctx context.Context, timeout time.Duration) (net.Conn, error) {
-	parallel := 100
+	parallel := p.parallel
 	if parallel > len(p.addrs) {
 		parallel = len(p.addrs)
 	}
@@ -98,7 +102,8 @@ func (p *probe) run(ctx context.Context, timeout time.Duration) (net.Conn, error
 	return nil, fmt.Errorf("cannot probe %v: %w", p.addrs, err)
 }
 
-func Dial(ctx context.Context, addrs []string, timeout time.Duration) (net.Conn, error) {
-	p := newProbe(addrs)
+// Probe dials multiple addresses in parallel and returns the first available connection
+func Dial(ctx context.Context, network string, addrs []string, timeout time.Duration) (net.Conn, error) {
+	p := newProbe(network, addrs)
 	return p.run(ctx, timeout)
 }
